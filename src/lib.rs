@@ -1,0 +1,44 @@
+#![feature(optin_builtin_traits, on_unimplemented, specialization)]
+#![cfg_attr(not(feature = "std"), no_std)]
+
+use into_cons::{ConsOf, IntoCons};
+pub use into_cons::NotTuple;
+use tuple::{IntoTuple, TupleOf};
+
+#[macro_use]
+pub mod cons;
+pub mod into_cons;
+pub mod tuple;
+
+
+pub trait Flatten: Sized + IntoCons {
+    /// Type of tuple after flattening.
+    type Flattened;
+    ///
+    ///
+    ///# Examples
+    ///
+    ///```rust
+    ///use flatten::Flatten;
+    ///"".flatten();
+    ///assert_eq!((1, 2, 3, 4), (1, (2, 3), 4).flatten());
+    ///assert_eq!((1, 2, 3, 4), (1, (2, (3,)), ((4,),)).flatten());
+    ///
+    ///```
+    fn flatten(self) -> Self::Flattened;
+}
+
+
+impl<Tup> Flatten for Tup
+where
+    ConsOf<Self>: IntoTuple,
+{
+    type Flattened = TupleOf<ConsOf<Self>>;
+    #[inline(always)]
+    fn flatten(self) -> Self::Flattened {
+        self.into_cons().into_tuple()
+    }
+}
+
+/// Type of tuple after flattening.
+pub type Flattened<T> = <T as Flatten>::Flattened;

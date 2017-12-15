@@ -1,0 +1,15 @@
+[package]
+name = "flatten"
+version = "0.1.0"
+authors = ["강동윤 <kdy1@outlook.kr>"]
+description = "Tuple flatteing for rust."
+repository = "https://github.com/kdy1/flatten"
+readme = "README.md"
+license = "Apache-2.0/MIT"
+keywords = ["tuple", "no_std"]
+
+[features]
+std = []
+default-features = ["std"]
+
+[dependencies]
