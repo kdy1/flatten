@@ -1,9 +1,9 @@
 //! This is **not** a public api.
 //!
 //! Convert values to `Cons`.
-
 use cons::*;
 use cons::fix::{FixHead, FixedHead};
+use either::Either;
 
 ///Creates cons.
 ///
@@ -75,8 +75,6 @@ pub trait IntoConsSpecializer: Sized {
 trait AssertIntoCons: IntoCons {}
 impl<T> AssertIntoCons for T {}
 
-
-
 pub type ConsOf<V> = <V as IntoCons>::Out;
 
 pub struct DefaultIntoCons<V>(V);
@@ -103,6 +101,23 @@ impl SpecializedIntoCons for NilIntoCons {
     }
 }
 
+pub struct EitherWithNeverImpl<R>(R);
+impl<R> From<Either<!, R>> for EitherWithNeverImpl<R> {
+    fn from(e: Either<!, R>) -> Self {
+        match e {
+            Either::Right(r) => EitherWithNeverImpl(r),
+        }
+    }
+}
+impl<R> IntoConsSpecializer for Either<!, R> {
+    type Specialized = EitherWithNeverImpl<R>;
+}
+impl<R> SpecializedIntoCons for EitherWithNeverImpl<R> {
+    type Out = ConsOf<R>;
+    fn into_cons_inner(self) -> Self::Out {
+        self.0.into_cons()
+    }
+}
 
 impl<V> IntoConsSpecializer for V {
     default type Specialized = DefaultIntoCons<Self>;
@@ -113,6 +128,7 @@ pub trait NotTuple {}
 impl NotTuple for ..{}
 impl !NotTuple for () {}
 impl<A> !NotTuple for (A,) {}
+impl<R> !NotTuple for Either<!, R> {}
 
 impl<NormalValue> IntoConsSpecializer for NormalValue
 where
@@ -146,8 +162,6 @@ where
     }
 }
 
-
-
 pub struct TupleIntoCons<V>(V);
 impl<V> From<V> for TupleIntoCons<V> {
     fn from(v: V) -> Self {
@@ -168,8 +182,6 @@ impl<A> SpecializedIntoCons for TupleIntoCons<(A,)> {
         IntoCons::into_cons(v.0)
     }
 }
-
-
 
 /// This implements IntoCons for (A, B, C)
 ///  by changing it to A + (B, C).
@@ -208,8 +220,6 @@ macro_rules! impl_for_tuple {
     };
 }
 
-
-
 impl_for_tuple! {
    (0, A),
    (1, B),
@@ -277,8 +287,6 @@ impl_for_tuple! {
    (7, H),
    (8, I),
 }
-
-
 
 impl_for_tuple! {
    (0, A),
@@ -292,8 +300,6 @@ impl_for_tuple! {
    (8, I),
    (9, J),
 }
-
-
 
 impl_for_tuple! {
    (0, A),
@@ -324,10 +330,11 @@ impl_for_tuple! {
    (11, L),
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use either::*;
+
     #[test]
     fn simple_value() {
         assert_eq!(
@@ -350,7 +357,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn nested_tuple() {
         assert_eq!((1, 2).into_cons(), (((1,),), 2).into_cons());
@@ -358,6 +364,40 @@ mod tests {
         assert_eq!(
             (1, 2, (3, 4,), (5, 6, (7, 8))).into_cons(),
             (1, 2, 3, 4, 5, 6, 7, 8).into_cons()
+        );
+    }
+
+    #[test]
+    fn either_never() {
+        let t: Either<!, usize> = Right(13);
+
+        assert_eq!(
+            t.into_cons(),
+            Cons {
+                head: 13usize,
+                tail: Nil,
+            }
+        );
+    }
+
+    #[test]
+    fn either_normal() {
+        let left: Either<usize, usize> = Left(1);
+        let right: Either<usize, usize> = Right(2);
+
+        assert_eq!(
+            left.into_cons(),
+            Cons {
+                head: Left(1),
+                tail: Nil,
+            }
+        );
+        assert_eq!(
+            right.into_cons(),
+            Cons {
+                head: Right(2),
+                tail: Nil,
+            }
         );
     }
 }

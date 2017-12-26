@@ -2,9 +2,7 @@
 //!
 //! Make `Cons` flat.
 
-
 use cons::*;
-
 
 /// Convert
 ///
@@ -32,7 +30,6 @@ pub trait FixHead {
 /// Fixed `Head`.
 pub type FixedHead<T> = <T as FixHead>::Fixed;
 
-
 /// Termination of recursion for `Head`.
 impl<V> FixHead for V
 where
@@ -47,8 +44,6 @@ where
         }
     }
 }
-
-
 
 impl<H: FixHead, T: Node> FixHead for Cons<H, T>
 where
@@ -89,8 +84,6 @@ where
     }
 }
 
-
-
 /// Compile time assertion.
 trait AssertFix<Res: Node>: Fix<Fixed = Res>
 where
@@ -100,7 +93,6 @@ where
 trait AssertValid: Node + ValidNode + Fix<Fixed = Self> {}
 
 impl AssertValid for Cons<usize, Nil> {}
-
 
 impl AssertFix<Cons<usize, Nil>> for Cons<Cons<usize, Nil>, Nil> {}
 impl AssertFix<Cons<usize, Nil>> for Cons<Cons<Cons<usize, Nil>, Nil>, Nil> {}

@@ -1,5 +1,7 @@
-#![feature(optin_builtin_traits, on_unimplemented, specialization)]
+#![feature(optin_builtin_traits, on_unimplemented, never_type, specialization)]
 #![cfg_attr(not(feature = "std"), no_std)]
+
+extern crate either;
 
 use into_cons::{ConsOf, IntoCons};
 pub use into_cons::NotTuple;
@@ -9,7 +11,6 @@ use tuple::{IntoTuple, TupleOf};
 pub mod cons;
 pub mod into_cons;
 pub mod tuple;
-
 
 pub trait Flatten: Sized + IntoCons {
     /// Type of tuple after flattening.
@@ -27,7 +28,6 @@ pub trait Flatten: Sized + IntoCons {
     ///```
     fn flatten(self) -> Self::Flattened;
 }
-
 
 impl<Tup> Flatten for Tup
 where

@@ -4,7 +4,6 @@
 
 use cons::{Cons, Nil, ValidHead, ValidNode};
 
-
 ///
 ///```rust,compile_fail
 ///extern crate flatten;
@@ -81,7 +80,6 @@ impl_for! {
     D => tail.tail.tail.head,
 }
 
-
 impl_for! {
     A => head,
     B => tail.head,
@@ -158,8 +156,6 @@ impl_for! {
     J => tail.tail.tail.tail.tail.tail.tail.tail.tail.head,
     K => tail.tail.tail.tail.tail.tail.tail.tail.tail.tail.head,
 }
-
-
 
 impl_for! {
     A => head,
@@ -177,9 +173,9 @@ impl_for! {
 }
 
 impl<A: ValidHead> IntoTuple for Cons<A, Nil> {
-    type Out = (A,);
+    type Out = A;
     #[inline(always)]
     fn into_tuple(self) -> Self::Out {
-        (self.head,)
+        (self.head)
     }
 }

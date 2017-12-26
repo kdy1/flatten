@@ -1,6 +1,6 @@
 [package]
 name = "flatten"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["강동윤 <kdy1@outlook.kr>"]
 description = "Tuple flatteing for rust."
 repository = "https://github.com/kdy1/flatten"
@@ -13,3 +13,4 @@ std = []
 default-features = ["std"]
 
 [dependencies]
+either = "1.4"

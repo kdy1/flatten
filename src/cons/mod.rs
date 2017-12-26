@@ -27,14 +27,10 @@ impl ValidHead for ..{}
 impl !ValidHead for Nil {}
 impl<H, T> !ValidHead for Cons<H, T> {}
 
-
 /// Fixed node.
 pub trait ValidNode: Node + Fix<Fixed = Self> {}
 impl ValidNode for Nil {}
 impl<Head: ValidHead, Tail: ValidNode> ValidNode for Cons<Head, Tail> {}
-
-
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct Cons<H, T: Node> {
@@ -44,7 +40,6 @@ pub struct Cons<H, T: Node> {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Nil;
-
 
 ///Appends a value to end of `Cons`.
 ///
@@ -62,7 +57,6 @@ pub trait Append<Tail: ValidNode> {
 
     fn append(self, tail: Tail) -> Self::Output;
 }
-
 
 impl<T: ValidNode> Append<T> for Nil {
     type Output = T;
