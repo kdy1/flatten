@@ -1,5 +1,6 @@
-//! This is **not** a public api.
-//!
+#![doc(hidden)]
+
+
 //! Convert values to `Cons`.
 use cons::*;
 use cons::fix::{FixHead, FixedHead};
@@ -59,6 +60,7 @@ where
     T: IntoConsSpecializer,
 {
     type Out = <<Self as IntoConsSpecializer>::Specialized as SpecializedIntoCons>::Out;
+    #[inline(always)]
     fn into_cons(self) -> Self::Out {
         self.specialize().into_cons_inner()
     }
@@ -66,6 +68,7 @@ where
 
 pub trait IntoConsSpecializer: Sized {
     type Specialized: From<Self> + SpecializedIntoCons;
+    #[inline(always)]
     fn specialize(self) -> Self::Specialized {
         self.into()
     }
@@ -79,6 +82,7 @@ pub type ConsOf<V> = <V as IntoCons>::Out;
 
 pub struct DefaultIntoCons<V>(V);
 impl<V> From<V> for DefaultIntoCons<V> {
+    #[inline(always)]
     fn from(v: V) -> Self {
         DefaultIntoCons(v)
     }
@@ -87,6 +91,7 @@ impl<V> From<V> for DefaultIntoCons<V> {
 /// Used to remove unit tuples.
 pub struct NilIntoCons;
 impl From<()> for NilIntoCons {
+    #[inline(always)]
     fn from(_: ()) -> Self {
         NilIntoCons
     }
@@ -96,6 +101,7 @@ impl IntoConsSpecializer for () {
 }
 impl SpecializedIntoCons for NilIntoCons {
     type Out = Nil;
+    #[inline(always)]
     fn into_cons_inner(self) -> Self::Out {
         Nil
     }
@@ -103,6 +109,7 @@ impl SpecializedIntoCons for NilIntoCons {
 
 pub struct EitherWithNeverImpl<R>(R);
 impl<R> From<Either<!, R>> for EitherWithNeverImpl<R> {
+    #[inline(always)]
     fn from(e: Either<!, R>) -> Self {
         match e {
             Either::Right(r) => EitherWithNeverImpl(r),
@@ -114,15 +121,22 @@ impl<R> IntoConsSpecializer for Either<!, R> {
 }
 impl<R> SpecializedIntoCons for EitherWithNeverImpl<R> {
     type Out = ConsOf<R>;
+    #[inline(always)]
     fn into_cons_inner(self) -> Self::Out {
         self.0.into_cons()
     }
 }
 
+/// Due to [a rust issue][issue #46707], this impl does not work properly.
+/// Although, this impl allow ommiting `IntoCons` bound.
+///
+///
+///[issue #46707]:https://github.com/rust-lang/rust/issues/46707
 impl<V> IntoConsSpecializer for V {
     default type Specialized = DefaultIntoCons<Self>;
 }
 
+/// Assert (to rustc) that your type isn't tuple.
 pub trait NotTuple {}
 #[allow(auto_impl)]
 impl NotTuple for ..{}
@@ -140,9 +154,7 @@ where
 #[macro_export]
 macro_rules! register_flatten {
     ($Type:ty) => {
-        impl $crate::into_cons::NotTuple for $Type {
-            type Specialized = DefaultIntoCons<Self>;
-        }
+        impl $crate::into_cons::NotTuple for $Type {}
     };
 }
 
@@ -164,6 +176,7 @@ where
 
 pub struct TupleIntoCons<V>(V);
 impl<V> From<V> for TupleIntoCons<V> {
+    #[inline(always)]
     fn from(v: V) -> Self {
         TupleIntoCons(v)
     }
@@ -177,6 +190,7 @@ impl<A> IntoConsSpecializer for (A,) {
 impl<A> SpecializedIntoCons for TupleIntoCons<(A,)> {
     type Out = ConsOf<A>;
 
+    #[inline(always)]
     fn into_cons_inner(self) -> Self::Out {
         let v = self.0;
         IntoCons::into_cons(v.0)

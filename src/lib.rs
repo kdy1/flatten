@@ -28,12 +28,11 @@ pub trait Flatten: Sized + IntoCons {
     ///```
     fn flatten(self) -> Self::Flattened;
 }
-
 impl<Tup> Flatten for Tup
 where
-    ConsOf<Self>: IntoTuple,
+    ConsOf<Self>: IntoTuple<Self>,
 {
-    type Flattened = TupleOf<ConsOf<Self>>;
+    type Flattened = TupleOf<ConsOf<Self>, Self>;
     #[inline(always)]
     fn flatten(self) -> Self::Flattened {
         self.into_cons().into_tuple()

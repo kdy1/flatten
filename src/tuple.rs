@@ -1,5 +1,5 @@
-//! This is **not** a public api.
-//!
+#![doc(hidden)]
+
 //! Convert `Cons` into tuples.
 
 use cons::{Cons, Nil, ValidHead, ValidNode};
@@ -15,22 +15,27 @@ use cons::{Cons, Nil, ValidHead, ValidNode};
 ///
 ///# }
 ///```
-#[rustc_on_unimplemented = "due to a issue with auto trait,
-if your struct, enum or union contains tuple field, you need
+#[rustc_on_unimplemented = "
+If you are writing generic code, add a bound like
 
-impl flatten::NotTuple for {Self} {{}}
-// or if your type isn't generic
-register_flatten!({Self});
+    where {OrigType}: Flatten,
+
+This bound is required because Flatten is implemented only if length of output tuple is smaller than 13.
 
 
-if not, please ensure that length of result tuple is smaller than 13 (<= 12)"]
-pub trait IntoTuple: ValidNode {
+
+If not, implement ::flatten::NotTuple for your type like
+
+    impl ::flatten::NotTuple for {OrigType} {{}}
+
+This is required because current type system does not have negative reasoning."]
+pub trait IntoTuple<OrigType>: ValidNode {
     type Out;
 
     fn into_tuple(self) -> Self::Out;
 }
 
-pub type TupleOf<C> = <C as IntoTuple>::Out;
+pub type TupleOf<C, OrigType> = <C as IntoTuple<OrigType>>::Out;
 
 macro_rules! impl_for {
     (
@@ -38,7 +43,7 @@ macro_rules! impl_for {
             $t:ident => $($e:tt).*,
         )+
     ) => {
-        impl< $( $t ),* > IntoTuple for Cons![ $( $t, )* ]
+        impl< $( $t ),* , OrigType> IntoTuple<OrigType> for Cons![ $( $t, )* ]
             where $(
                     $t: ValidHead,
                   )*
@@ -172,7 +177,7 @@ impl_for! {
     L => tail.tail.tail.tail.tail.tail.tail.tail.tail.tail.tail.head,
 }
 
-impl<A: ValidHead> IntoTuple for Cons<A, Nil> {
+impl<A: ValidHead, OrigType> IntoTuple<OrigType> for Cons<A, Nil> {
     type Out = A;
     #[inline(always)]
     fn into_tuple(self) -> Self::Out {

@@ -1,5 +1,3 @@
-//! This is **not** a public api.
-//!
 //! Make `Cons` flat.
 
 use cons::*;

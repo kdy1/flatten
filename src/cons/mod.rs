@@ -1,5 +1,4 @@
-//! This is **not** a public api.
-//!
+#![doc(hidden)]
 
 pub mod fix;
 use self::fix::Fix;
