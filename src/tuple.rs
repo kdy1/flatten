@@ -6,21 +6,22 @@ use cons::{Cons, Nil, ValidHead, ValidNode};
 
 ///
 ///```rust,compile_fail
-///extern crate flatten;
-///use flatten::Flatten;
+/// extern crate flatten;
+/// use flatten::Flatten;
 ///
-///# fn main() {
-///let too_big = (1, 2, 3, (4, 5), 6, (7, 8), (9, 10), (11, 12, 13, 14), 15);
-///too_big.flatten();//~ ERROR length of result tuple should be <= 12
+/// # fn main() {
+/// let too_big = (1, 2, 3, (4, 5), 6, (7, 8), (9, 10), (11, 12, 13, 14), 15);
+/// too_big.flatten();//~ ERROR length of result tuple should be <= 12
 ///
-///# }
-///```
+/// # }
+/// ```
 #[rustc_on_unimplemented = "
 If you are writing generic code, add a bound like
 
     where {OrigType}: Flatten,
 
-This bound is required because Flatten is implemented only if length of output tuple is smaller than 13.
+This bound is required because Flatten is implemented only if length of output tuple is smaller \
+                            than 13.
 
 
 

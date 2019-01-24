@@ -20,9 +20,7 @@ impl<H, T: Node> Node for Cons<H, T> {
 pub type AsCons<N> = Cons<<N as Node>::ConsHead, <N as Node>::ConsTail>;
 
 /// Everything **except** `Cons` and `Nil`.
-pub trait ValidHead {}
-#[allow(auto_impl)]
-impl ValidHead for ..{}
+pub auto trait ValidHead {}
 impl !ValidHead for Nil {}
 impl<H, T> !ValidHead for Cons<H, T> {}
 
@@ -47,10 +45,10 @@ pub struct Nil;
 ///As Nil is treated as a something like zero,
 ///
 ///```rust,ignore
-///
-///Nil + Nil = Nil
-///Nil + Cons<H, T> = Cons<H, T>
-///```
+/// 
+/// Nil + Nil = Nil
+/// Nil + Cons<H, T> = Cons<H, T>
+/// ```
 pub trait Append<Tail: ValidNode> {
     type Output: ValidNode;
 

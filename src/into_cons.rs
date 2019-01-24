@@ -1,9 +1,10 @@
 #![doc(hidden)]
 
-
 //! Convert values to `Cons`.
-use cons::*;
-use cons::fix::{FixHead, FixedHead};
+use cons::{
+    fix::{FixHead, FixedHead},
+    *,
+};
 use either::Either;
 
 ///Creates cons.
@@ -22,30 +23,40 @@ pub trait IntoCons: Sized {
     ///# Examples
     ///
     ///```rust
-    ///use flatten::into_cons::IntoCons;
-    ///use flatten::cons::{Append, Cons, Nil};
+    /// use flatten::{
+    ///     cons::{Append, Cons, Nil},
+    ///     into_cons::IntoCons,
+    /// };
     ///
-    ///assert_eq!(('a', 1usize).into_cons(), 'a'.into_cons().append(1usize.into_cons()));
-    ///fn sig(_: Cons<char, Cons<usize, Nil>>) {}
-    ///sig(('a', 1usize).into_cons());
-    ///
-    ///```
+    /// assert_eq!(
+    ///     ('a', 1usize).into_cons(),
+    ///     'a'.into_cons().append(1usize.into_cons())
+    /// );
+    /// fn sig(_: Cons<char, Cons<usize, Nil>>) {}
+    /// sig(('a', 1usize).into_cons());
+    /// ```
     ///
     ///# Example for using struct with tuple field
     ///```rust
-    ///use flatten::into_cons::{IntoCons, NotTuple};
-    ///use flatten::cons::{Append, Cons, Nil};
-    ///#[derive(Debug, PartialEq, Eq)]
-    ///struct A { a: (u8, u8), }
-    ///impl flatten::NotTuple for A {
-    ///}
-    ///# fn main() {
-    ///assert_eq!(Cons{
-    ///    head: A{ a: (0,1), },
-    ///    tail: Nil,
-    ///}, (A{a:(0, 1),},).into_cons());
-    ///# }
-    ///```
+    /// use flatten::{
+    ///     cons::{Append, Cons, Nil},
+    ///     into_cons::{IntoCons, NotTuple},
+    /// };
+    /// #[derive(Debug, PartialEq, Eq)]
+    /// struct A {
+    ///     a: (u8, u8),
+    /// }
+    /// impl flatten::NotTuple for A {}
+    /// # fn main() {
+    /// assert_eq!(
+    ///     Cons {
+    ///         head: A { a: (0, 1) },
+    ///         tail: Nil,
+    ///     },
+    ///     (A { a: (0, 1) },).into_cons()
+    /// );
+    /// # }
+    /// ```
     fn into_cons(self) -> Self::Out;
 }
 
@@ -112,6 +123,7 @@ impl<R> From<Either<!, R>> for EitherWithNeverImpl<R> {
     #[inline(always)]
     fn from(e: Either<!, R>) -> Self {
         match e {
+            Either::Left(_) => unreachable!(),
             Either::Right(r) => EitherWithNeverImpl(r),
         }
     }
@@ -137,9 +149,7 @@ impl<V> IntoConsSpecializer for V {
 }
 
 /// Assert (to rustc) that your type isn't tuple.
-pub trait NotTuple {}
-#[allow(auto_impl)]
-impl NotTuple for ..{}
+pub auto trait NotTuple {}
 impl !NotTuple for () {}
 impl<A> !NotTuple for (A,) {}
 impl<R> !NotTuple for Either<!, R> {}
@@ -170,7 +180,8 @@ where
         Cons {
             head: self.0,
             tail: Nil,
-        }.fix_head()
+        }
+        .fix_head()
     }
 }
 
